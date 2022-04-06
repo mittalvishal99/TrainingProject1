@@ -2,8 +2,12 @@ package com.example.demo987.controllers;
 
 import java.awt.print.Book;
 import java.util.List;
+import java.util.Optional;
 
+import org.hibernate.dialect.MySQL8Dialect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,19 +22,33 @@ import com.example.demo987.services.BookService;
 @RestController
 public class BookController 
 {
+	
 	@Autowired
 	private BookService bookService;
 	
 	@GetMapping("/books")
-	public List<BookEntity> getBooks()
+	public ResponseEntity<List<BookEntity>> getBooks()
 	{
-		return this.bookService.getBooks();
+		List<BookEntity> list=bookService.getBooks();;
+		if(list.size()<=0)
+		{
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+		
+		return ResponseEntity.of(Optional.of(list));
 	}
 	
 	@GetMapping("/books/{id}")
-	public BookEntity getBook(@PathVariable("id") int id)
+	public ResponseEntity<BookEntity> getBook(@PathVariable("id") int id)
 	{
-		return this.bookService.getBook(id);
+		BookEntity b=bookService.getBook(id);
+		if(b==null)
+		{
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+		else {
+			return ResponseEntity.of(Optional.of(b));
+		}
 	}
 	
 	@PostMapping("/books")
